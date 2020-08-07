@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.IO;
 using System.Net.Mail;
 using System.Security.Cryptography;
+using System.Runtime.CompilerServices;
 
 namespace ImportDb
 {
@@ -38,41 +39,90 @@ namespace ImportDb
             conn.Open();
             try
             {
+                
                
-               
-                string[] dirs = Directory.GetFiles(sPath, sFileNameEmpList+"*");
-                //Console.WriteLine("The number of files starting with c is {0}.", dirs.Length);
-                if(dirs == null)
+                string[] EmpListdirs = Directory.GetFiles(sPath, sFileNameEmpList+"*");
+                if(EmpListdirs == null || EmpListdirs.Length == 0)
                 {
                     Console.WriteLine("no file");
                 }
                 else
                 {
-                    /*
-                    string sSqlCmdTruncate = "truncate table NET_HRIS_EMP";
-                    SqlCommand cmdTruncate = new SqlCommand(sSqlCmdTruncate, conn);
-                    cmdTruncate.ExecuteReader();
-                    */
-                    string csvPath = dirs[0];
-                    Console.WriteLine(Path.GetFileName(dirs[0]));
-                    string csvData = System.IO.File.ReadAllText(csvPath);
-                    string sSqlInsert = "";
-                    foreach (string row in csvData.Split('\n'))
-                    {
-                        if (!string.IsNullOrEmpty(row))
-                        {
+                    /*員工清單*/
+                    string sSqlCmdTruncate = "truncate table " + sFileNameEmpList;
+                    SqlCommand sqlTruncate = new SqlCommand(sSqlCmdTruncate, conn);
+                   
+                    sqlTruncate.ExecuteNonQuery();
 
-                           // Console.WriteLine(row);
-                            int i = 0;
+                    string EmpListCsvPath = EmpListdirs[0];
+                    Console.WriteLine(Path.GetFileName(EmpListdirs[0]));
+                    string EmpListCsvData = System.IO.File.ReadAllText(EmpListCsvPath);
+                    string sSqlInsert = "";
+                    int i = 0;
+                    foreach (string row in EmpListCsvData.Split('\n'))
+                    {
+                        if (!string.IsNullOrEmpty(row) & i!=0)
+                        {
                             string[] cell = row.Split(',');
-                            //Console.WriteLine(cell[2]+","+cell[5]+","+cell[19]+","+cell[27]);
-                            sSqlInsert = $"INSERT INTO NET_HRIS_EMP values ('{cell[2]}','{cell[5]}','{cell[19]}','{cell[27]}')";
-                            Console.WriteLine(sSqlInsert);
+                            sSqlInsert += $"INSERT INTO { sFileNameEmpList } values ('{cell[2]}','{cell[5]}','{cell[19]}','{cell[27]}');";
                             
                         }
+                        i++;
                     }
+                    SqlCommand sqlInsert = new SqlCommand(sSqlInsert, conn);
+
+                    int numberOfRecords = sqlInsert.ExecuteNonQuery();
+                    Console.WriteLine(sFileNameEmpList+ " count: " + numberOfRecords);
+                    File.Delete(EmpListCsvPath);
+
+                   
+
+                    
                 }
-                
+                string[] UniListdirs = Directory.GetFiles(sPath, sFileNameUniList + "*");
+                if (UniListdirs == null || UniListdirs.Length == 0)
+                {
+                    Console.WriteLine("no file");
+                }
+                else
+                {
+                    /*員工清單*/
+                    string sSqlCmdTruncate = "truncate table " + sFileNameUniList;
+                    SqlCommand sqlTruncate = new SqlCommand(sSqlCmdTruncate, conn);
+
+                    sqlTruncate.ExecuteNonQuery();
+
+                    string UniListCsvPath = UniListdirs[0];
+                    Console.WriteLine(Path.GetFileName(UniListdirs[0]));
+                    string UniListCsvData = System.IO.File.ReadAllText(UniListCsvPath);
+                    string sSqlInsert = "";
+                    int i = 0;
+                    foreach (string row in UniListCsvData.Split('\n'))
+                    {
+                        // Console.WriteLine(row);
+                        if (!string.IsNullOrEmpty(row) & i != 0)
+                        {
+                            string[] cell = row.Split(',');
+                            sSqlInsert += $"INSERT INTO {sFileNameUniList} values ('{cell[0]}','{cell[1]}','{cell[2]}');";
+
+                        }
+                        i++;
+                    }
+                    SqlCommand sqlInsert = new SqlCommand(sSqlInsert, conn);
+
+                    int numberOfRecords = sqlInsert.ExecuteNonQuery();
+                    Console.WriteLine(sFileNameUniList + "count: " + numberOfRecords);
+                    File.Delete(UniListCsvPath);
+
+
+
+
+
+
+
+                    conn.Close();
+                }
+
             }
             catch (Exception e)
             {
