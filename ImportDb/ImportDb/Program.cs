@@ -38,7 +38,7 @@ namespace ImportDb
             conn.Open();
             try
             {
-                // Only get files that begin with the letter "c".C:\Users\ivank\OneDrive\source\repos\ImportDb\ImportDb\ImportDb\txt_files\
+               
                
                 string[] dirs = Directory.GetFiles(sPath, sFileNameEmpList+"*");
                 //Console.WriteLine("The number of files starting with c is {0}.", dirs.Length);
@@ -48,22 +48,27 @@ namespace ImportDb
                 }
                 else
                 {
+                    /*
+                    string sSqlCmdTruncate = "truncate table NET_HRIS_EMP";
+                    SqlCommand cmdTruncate = new SqlCommand(sSqlCmdTruncate, conn);
+                    cmdTruncate.ExecuteReader();
+                    */
                     string csvPath = dirs[0];
                     Console.WriteLine(Path.GetFileName(dirs[0]));
                     string csvData = System.IO.File.ReadAllText(csvPath);
+                    string sSqlInsert = "";
                     foreach (string row in csvData.Split('\n'))
                     {
                         if (!string.IsNullOrEmpty(row))
                         {
 
-                            Console.WriteLine(row);
+                           // Console.WriteLine(row);
                             int i = 0;
-                            foreach (string cell in row.Split(','))
-                            {
-                                //dt.Rows[dt.Rows.Count - 1][i] = cell;
-                                //Response.Write(cell);
-                                i++;
-                            }
+                            string[] cell = row.Split(',');
+                            //Console.WriteLine(cell[2]+","+cell[5]+","+cell[19]+","+cell[27]);
+                            sSqlInsert = $"INSERT INTO NET_HRIS_EMP values ('{cell[2]}','{cell[5]}','{cell[19]}','{cell[27]}')";
+                            Console.WriteLine(sSqlInsert);
+                            
                         }
                     }
                 }
