@@ -25,7 +25,7 @@ namespace ImportDb
             string sDbUser = System.Configuration.ConfigurationManager.AppSettings.Get("DbUser");
             string sDbPassword = DecryptStr(System.Configuration.ConfigurationManager.AppSettings.Get("DbPassword"), sEncrKey);
 
-            string sPath = ".\\txt_files";
+            string sPath = ".\\";
             string sFileNameEmpList = "NET_HRIS_EMP";
             string sFileNameUniList = "UNI_RES";
 
@@ -37,6 +37,7 @@ namespace ImportDb
 
             //SqlConnection conn = new SqlConnection("data source=.\\SQLExpress; initial catalog = FUBON_DLP; user id = fubon_dlp; password = 1234");
             conn.Open();
+            var strLog = "";
             try
             {
                 
@@ -44,6 +45,9 @@ namespace ImportDb
                 string[] EmpListdirs = Directory.GetFiles(sPath, sFileNameEmpList+"*");
                 if(EmpListdirs == null || EmpListdirs.Length == 0)
                 {
+                    strLog += DateTime.Now.ToString("yyyyMMdd hh:mm:ss tt") + " " + "File Error" + "\r\n";
+                    File.AppendAllText(@"output.txt", strLog);
+
                     Console.WriteLine("no file");
                 }
                 else
@@ -56,6 +60,8 @@ namespace ImportDb
 
                     string EmpListCsvPath = EmpListdirs[0];
                     Console.WriteLine(Path.GetFileName(EmpListdirs[0]));
+                    var strPath = Path.GetFileName(EmpListdirs[0]);
+                    strLog += DateTime.Now.ToString("yyyyMMdd hh:mm:ss tt") + " ReadFile" + strPath + "\r\n";
                     string EmpListCsvData = System.IO.File.ReadAllText(EmpListCsvPath);
                     string sSqlInsert = "";
                     int i = 0;
@@ -72,6 +78,7 @@ namespace ImportDb
                     SqlCommand sqlInsert = new SqlCommand(sSqlInsert, conn);
 
                     int numberOfRecords = sqlInsert.ExecuteNonQuery();
+                    strLog += DateTime.Now.ToString("yyyyMMdd hh:mm:ss tt") + " count: " + numberOfRecords + "\r\n";
                     Console.WriteLine(sFileNameEmpList+ " count: " + numberOfRecords);
                     File.Delete(EmpListCsvPath);
 
@@ -93,7 +100,9 @@ namespace ImportDb
                     sqlTruncate.ExecuteNonQuery();
 
                     string UniListCsvPath = UniListdirs[0];
+                    strLog += DateTime.Now.ToString("yyyyMMdd hh:mm:ss tt") + " Read File: " + Path.GetFileName(UniListdirs[0]) + "\r\n";
                     Console.WriteLine(Path.GetFileName(UniListdirs[0]));
+
                     string UniListCsvData = System.IO.File.ReadAllText(UniListCsvPath);
                     string sSqlInsert = "";
                     int i = 0;
@@ -111,6 +120,10 @@ namespace ImportDb
                     SqlCommand sqlInsert = new SqlCommand(sSqlInsert, conn);
 
                     int numberOfRecords = sqlInsert.ExecuteNonQuery();
+                    strLog += DateTime.Now.ToString("yyyyMMdd hh:mm:ss tt") + " count: " + numberOfRecords + "\r\n";
+
+                    File.AppendAllText(@"output.txt", strLog);
+
                     Console.WriteLine(sFileNameUniList + "count: " + numberOfRecords);
                     File.Delete(UniListCsvPath);
 
