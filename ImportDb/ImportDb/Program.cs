@@ -45,8 +45,9 @@ namespace ImportDb
                 string[] EmpListdirs = Directory.GetFiles(sPath, sFileNameEmpList+"*");
                 if(EmpListdirs == null || EmpListdirs.Length == 0)
                 {
-                    strLog += DateTime.Now.ToString("yyyyMMdd hh:mm:ss tt") + " " + "File Error" + "\r\n";
-                    File.AppendAllText(@"output.txt", strLog);
+                    var strLogTemp = DateTime.Now.ToString("yyyyMMdd hh:mm:ss tt") + " " + "File Error" + "\r\n";
+
+                    File.AppendAllText(@"import.txt", strLogTemp);
 
                     Console.WriteLine("no file");
                 }
@@ -61,7 +62,8 @@ namespace ImportDb
                     string EmpListCsvPath = EmpListdirs[0];
                     Console.WriteLine(Path.GetFileName(EmpListdirs[0]));
                     var strPath = Path.GetFileName(EmpListdirs[0]);
-                    strLog += DateTime.Now.ToString("yyyyMMdd hh:mm:ss tt") + " ReadFile" + strPath + "\r\n";
+                    var strLogTemp = DateTime.Now.ToString("yyyyMMdd hh:mm:ss tt") + " ReadFile" + strPath + "\r\n";
+                    File.AppendAllText(@"import.txt", strLogTemp);
                     string EmpListCsvData = System.IO.File.ReadAllText(EmpListCsvPath);
                     string sSqlInsert = "";
                     int i = 0;
@@ -120,9 +122,9 @@ namespace ImportDb
                     SqlCommand sqlInsert = new SqlCommand(sSqlInsert, conn);
 
                     int numberOfRecords = sqlInsert.ExecuteNonQuery();
-                    strLog += DateTime.Now.ToString("yyyyMMdd hh:mm:ss tt") + " count: " + numberOfRecords + "\r\n";
+                    var strLogTemp = DateTime.Now.ToString("yyyyMMdd hh:mm:ss tt") + " count: " + numberOfRecords + "\r\n";
 
-                    File.AppendAllText(@"output.txt", strLog);
+                    File.AppendAllText(@"output.txt", strLogTemp);
 
                     Console.WriteLine(sFileNameUniList + "count: " + numberOfRecords);
                     File.Delete(UniListCsvPath);
@@ -140,6 +142,7 @@ namespace ImportDb
             catch (Exception e)
             {
                 Console.WriteLine("The process failed: {0}", e.ToString());
+                File.AppendAllText(@"output.txt", $"{ DateTime.Now.ToString("yyyyMMdd hh:mm:ss tt")}  The process failed: {e.Message}");
             }
 
         }
